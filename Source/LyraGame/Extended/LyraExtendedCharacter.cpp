@@ -69,12 +69,13 @@ void ALyraExtendedCharacter::StartClimbing(const FLedgeData& LedgeData)
 {
 	ClimbingMovementData.StartLocation = GetActorLocation();
 	ClimbingMovementData.StartRotation = GetActorRotation();
-	ClimbingMovementData.EndLocation = LedgeData.Location;
+	ClimbingMovementData.EndLocation = LedgeData.Location + ClimbingEndLocationZOffset;
 	ClimbingMovementData.EndRotation = LedgeData.Rotation;
 	float LedgeHeight = ClimbingMovementData.EndLocation.Z - ClimbingMovementData.StartLocation.Z;
 	const FClimbingOption& ClimbingOption = LedgeHeight >= HighClimbingOptionHeightThreshold ? HighClimbingOption : LowClimbingOption;
 	ClimbingMovementData.Duration = ClimbingOption.Duration;
-	ClimbingMovementData.LerpAlphaCurve = ClimbingOption.LerpAlphaCurve;
+	ClimbingMovementData.Curve = ClimbingOption.Curve;
+	ClimbingMovementData.StartAnimationLocation = ClimbingMovementData.EndLocation + ClimbingOption.StartingOffset.Z * FVector::DownVector + ClimbingOption.StartingOffset.Y * LedgeData.Normal;
 	ClimbingMovementData.TimeOffset = FMath::GetMappedRangeValueClamped<float, float>({ ClimbingOption.LowestHeight, ClimbingOption.HighestHeight }, { ClimbingOption.LowestTimeOffset, ClimbingOption.HighestTimeOffset }, LedgeHeight);
 
 	check(GetMesh()->GetAnimInstance());
@@ -170,6 +171,7 @@ bool ALyraExtendedCharacter::TryFindLedge(OUT FLedgeData& LedgeData) const
 	}
 
 	LedgeData.Location = OverlapLocation;
+	LedgeData.Normal = ForwardSweepHitResult.ImpactNormal.GetSafeNormal2D();
 	LedgeData.Rotation = (ForwardSweepHitResult.ImpactNormal * FVector(-1.0f, -1.0f, 0.0f)).ToOrientationRotator();
 
 	return true;

@@ -17,11 +17,16 @@ struct FLedgeData
 	FVector Location;
 
 	UPROPERTY()
+	FVector Normal;
+
+	UPROPERTY()
 	FRotator Rotation;
 };
 
 struct FClimbingMovementData
 {
+	FVector StartAnimationLocation;
+
 	FVector StartLocation;
 	FRotator StartRotation;
 
@@ -31,7 +36,7 @@ struct FClimbingMovementData
 	float Duration;
 	float TimeOffset;
 
-	UCurveFloat* LerpAlphaCurve;
+	class UCurveVector* Curve;
 };
 
 USTRUCT(BlueprintType)
@@ -43,7 +48,7 @@ struct FClimbingOption
 	class UAnimMontage* Montage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class UCurveFloat* LerpAlphaCurve;
+	class UCurveVector* Curve;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0.0f, UIMin = 0.0f))
 	float Duration;
@@ -59,6 +64,9 @@ struct FClimbingOption
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0.0f, UIMin = 0.0f))
 	float HighestTimeOffset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FVector StartingOffset;
 };
 
 /**
@@ -102,6 +110,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Climbing", meta = (UIMin = 0.0f, ClampMin = 0.0f))
 	float HighClimbingOptionHeightThreshold = 125.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Climbing", meta = (ClampMin = 0.0f, UIMin = 0.0f))
+	float ClimbingEndLocationZOffset = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Climbing")
 	FClimbingOption HighClimbingOption;

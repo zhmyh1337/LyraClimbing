@@ -3,6 +3,7 @@
 
 #include "Extended/LyraExtendedMovementComponent.h"
 #include "LyraExtendedCharacter.h"
+#include "Curves/CurveVector.h"
 
 void ULyraExtendedMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
 {
@@ -13,9 +14,15 @@ void ULyraExtendedMovementComponent::PhysCustom(float deltaTime, int32 Iteration
 		const FClimbingMovementData& CurrentClimbingData = GetLyraExtendedCharacter()->GetClimbingMovementData();
 
 		float ElapsedTime = GetWorld()->GetTimerManager().GetTimerElapsed(GetLyraExtendedCharacter()->GetClimbingTimer());
-		float LerpAlpha = CurrentClimbingData.LerpAlphaCurve->GetFloatValue(ElapsedTime + CurrentClimbingData.TimeOffset);
+		FVector CurveValue = CurrentClimbingData.Curve->GetVectorValue(ElapsedTime + CurrentClimbingData.TimeOffset);
+		float LerpAlpha = CurveValue.X;
+		float NormalCorrectionAlpha = CurveValue.Y;
+		float ZCorrectionAlpha = CurveValue.Z;
 
-		FVector NewLocation = FMath::Lerp(CurrentClimbingData.StartLocation, CurrentClimbingData.EndLocation, LerpAlpha);
+		FVector CorrectedStartLocation = FMath::Lerp(CurrentClimbingData.StartLocation, CurrentClimbingData.StartAnimationLocation, NormalCorrectionAlpha);
+		CorrectedStartLocation.Z = FMath::Lerp(CurrentClimbingData.StartLocation.Z, CurrentClimbingData.StartAnimationLocation.Z, ZCorrectionAlpha);
+
+		FVector NewLocation = FMath::Lerp(CorrectedStartLocation, CurrentClimbingData.EndLocation, LerpAlpha);
 		FRotator NewRotation = FMath::Lerp(CurrentClimbingData.StartRotation, CurrentClimbingData.EndRotation, LerpAlpha);
 
 		FVector LocationDelta = NewLocation - GetActorLocation();
