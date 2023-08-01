@@ -95,7 +95,7 @@ void ALyraExtendedCharacter::StopClimbing()
 
 bool ALyraExtendedCharacter::CanClimb() const
 {
-	return GetExtendedMovementComponent()->IsMovingOnGround() && !IsClimbing();
+	return !IsClimbing();
 }
 
 bool ALyraExtendedCharacter::TryFindLedge(OUT FLedgeData& LedgeData) const
